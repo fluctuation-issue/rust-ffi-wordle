@@ -1,0 +1,11 @@
+"Game" = "Spiel";
+"Settings" = "Einstellungen";
+"Words" = "";
+"No words" = "No words";
+"new word" = "neues Wort";
+"New Word" = "Neues Wort";
+"Cancel" = "Stornieren";
+"Done" = "Erledigt";
+"New Word Error" = "Neues Wort-Fehler";
+"New word can not be empty." = "Neues Wort darf nicht leer sein.";
+"This word already exists." = "Dieses Wort existiert bereits.";

@@ -1,0 +1,9 @@
+"Reset" = "Réinitialiser";
+"Submit" = "Soumettre";
+"My guess" = "Ma tentative";
+"Guess Error" = "Erreur de tentative";
+"You can not guess an empty word." =  "Vous ne pouvez pas soumettre un mot vide.";
+"This word was already guessed." = "Ce mot a déjà été soumis.";
+"Game Won :)" = "Partie remportée :)";
+"Game Lost :(" = "Partie perdue :(";
+"The word to guess was: %@." = "Le mot à deviner était : %@.";

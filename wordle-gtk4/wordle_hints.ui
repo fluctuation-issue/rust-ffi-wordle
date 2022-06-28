@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="WordleHints" parent="GtkBox">
+        <child>
+            <object class="GtkLabel" id="word_length">
+            </object>
+        </child>
+        <child>
+            <object class="GtkGrid" id="grid">
+                <property name="row-spacing">12</property>
+                <property name="column-spacing">12</property>
+                <property name="halign">center</property>
+                <property name="hexpand">1</property>
+            </object>
+        </child>
+    </template>
+</interface>

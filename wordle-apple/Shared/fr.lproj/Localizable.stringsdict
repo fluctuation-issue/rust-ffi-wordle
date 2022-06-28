@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Congratulations, you guessed the word in %lld attempts.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Félicitations, vous avez trouvé le mot en %#@attempts@.</string>
+		<key>attempts</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>zero</key>
+			<string>%lld tentative</string>
+			<key>one</key>
+			<string>%lld tentative</string>
+			<key>other</key>
+			<string>%lld tentatives</string>
+		</dict>
+	</dict>
+	<key>Your word is %lld-letter long.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Votre mot fait %#@letter@.</string>
+		<key>letter</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>zero</key>
+			<string>%lld caractère</string>
+			<key>one</key>
+			<string>%lld caractère</string>
+			<key>other</key>
+			<string>%lld caractères</string>
+		</dict>
+	</dict>
+	<key>Your word must be %lld-character long. It was %lld.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Votre mot doit faire %#@expected@. La tentative en contient %#@given@.</string>
+		<key>expected</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>zero</key>
+			<string>%lld caractère</string>
+			<key>one</key>
+			<string>%lld caractère</string>
+			<key>other</key>
+			<string>%lld caractères</string>
+		</dict>
+		<key>given</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

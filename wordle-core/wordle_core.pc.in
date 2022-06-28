@@ -1,0 +1,9 @@
+prefix=$$PWD
+includedir=${prefix}/include
+libdir=${prefix}/target/debug
+
+Name: wordle_core
+Description: Core functions to create wordle games
+Version: 0.1.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -lwordle_core -lpthread -ldl

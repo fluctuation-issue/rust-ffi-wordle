@@ -1,0 +1,35 @@
+msgid ""
+msgstr ""
+"Language: French\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplural=2; plural=n>1;\n"
+"Project-Id-Version: 0.1.0\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+msgid "Wordle"
+msgstr "Jeu de wordle"
+
+msgid "My guess"
+msgstr "Tentative de mot"
+
+msgid "Quit"
+msgstr "Quitter"
+
+msgid "Submit"
+msgstr "Essayer"
+
+msgid "Reset"
+msgstr "Réinitialiser"
+
+msgid "You won!"
+msgstr "Vous avez gagné!"
+
+msgid "You lost! The word was %s."
+msgstr "Vous avez perdu :( Le mot était %s."
+
+msgid "Word length: %s"
+msgstr "Longueur du mot : %s"

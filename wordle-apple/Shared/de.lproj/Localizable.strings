@@ -1,0 +1,9 @@
+"Reset" = "Zurücksetzen";
+"Submit" = "Einsenden";
+"My guess" = "Meine Vermutung";
+"Guess Error" = "Schätze Fehler";
+"You can not guess an empty word." = "Sie können kein leeres Wort erraten.";
+"This word was already guessed." = "Dieses Wort wurde bereits erraten.";
+"Game Won :)" = "Spiel gewonnen";
+"Game Lost :(" = "Spiel verloren :(";
+"The word to guess was: %@." = "Das Wort zu erraten war: %@.";

@@ -1,0 +1,9 @@
+"Reset" = "Reset";
+"Submit" = "Submit";
+"My guess" = "My guess";
+"Guess Error" = "Guess Error";
+"You can not guess an empty word." = "You can not guess an empty word.";
+"This word was already guessed." = "This word was already guessed.";
+"Game Won :)" = "Game Won :)";
+"Game Lost :(" = "Game Lost :(";
+"The word to guess was: %@." = "The word to guess was: %@.";

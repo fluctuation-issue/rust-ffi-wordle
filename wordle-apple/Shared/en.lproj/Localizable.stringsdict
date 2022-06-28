@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Congratulations, you guessed the word in %lld attempts.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Congratulations, you guessed the word in %#@attempts@.</string>
+		<key>attempts</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld attempt</string>
+			<key>other</key>
+			<string>%lld attempts</string>
+		</dict>
+	</dict>
+	<key>You word is %lld-letter long.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>You word is %#@letter@-letter long.</string>
+		<key>letter</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld</string>
+		</dict>
+	</dict>
+	<key>Your word must be %lld-character long. It was %lld.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>You word must be %#@expected@-character long. It was %#@given@.</string>
+		<key>expected</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld</string>
+		</dict>
+		<key>given</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

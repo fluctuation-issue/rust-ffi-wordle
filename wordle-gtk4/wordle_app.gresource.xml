@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="/local/imgt/wordle_app">
+        <file preprocess="xml-stripblanks">wordle_app_window.ui</file>
+        <file preprocess="xml-stripblanks">wordle_hints.ui</file>
+    </gresource>
+</gresources>
