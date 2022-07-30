@@ -3,40 +3,46 @@
 use super::hint::{GuessHint, GuessHintT};
 
 /// Wordle game.
+#[cfg_attr(test, derive(Eq,PartialEq,Debug))]
 pub struct Game {
     word_to_guess: String,
     guesses: Vec<String>,
     attempts_count_limit: usize,
 }
 
+#[derive(Debug)]
+#[cfg_attr(test, derive(Eq,PartialEq))]
+/// A new game could not be instantiated.
+pub enum GameNewError {
+    /// The target word had a null length.
+    WordToGuessEmpty,
+    /// The allowed attempts (before loosing the game) count was invalid.
+    AttemptsCountLimitNull
+}
+
 impl Game {
     /// New game, whose goal is to guess the specified word.
-    /// # Panic
-    /// - `word_to_guess` is empty
-    pub fn new(word_to_guess: &str) -> Self {
+    pub fn new(word_to_guess: &str) -> Result<Self, GameNewError> {
         if word_to_guess.is_empty() {
-            panic!("word to guess must not be null");
-        }
-        Self {
-            word_to_guess: word_to_guess.to_uppercase(),
-            guesses: vec![],
-            attempts_count_limit: 6,
+            Err(GameNewError::WordToGuessEmpty)
+        } else {
+            Ok(Self {
+                word_to_guess: word_to_guess.to_uppercase(),
+                guesses: vec![],
+                attempts_count_limit: 6,
+           })
         }
     }
 
-    /// New game with custom attemps count limit.
-    ///
-    /// # Panic
-    /// Panics if:
-    /// - `attempts_count_limit` is `0`
-    /// - `word_to_guess` is empty
-    pub fn new_with_attempts_count_limit(word_to_guess: &str, attempts_count_limit: usize) -> Self {
+    /// New game with custom attempts count limit.
+    pub fn new_with_attempts_count_limit(word_to_guess: &str, attempts_count_limit: usize) -> Result<Self, GameNewError> {
         if attempts_count_limit < 1 {
-            panic!("attempts count limit must not be null");
+            Err(GameNewError::AttemptsCountLimitNull)
+        } else {
+            let mut result = Self::new(word_to_guess)?;
+            result.attempts_count_limit = attempts_count_limit;
+            Ok(result)
         }
-        let mut result = Self::new(word_to_guess);
-        result.attempts_count_limit = attempts_count_limit;
-        result
     }
 
     /// Retrieve the current game state.
@@ -77,14 +83,14 @@ impl Game {
     pub fn guess_hints(&self) -> impl std::iter::Iterator<Item = GuessHint<'_>> + '_ {
         self.guesses
             .iter()
-            .map(|guess| GuessHint::new(guess, &self.word_to_guess))
+            .map(|guess| GuessHint::new(guess, &self.word_to_guess).unwrap())
     }
 
     /// Get hints for the newest guessed word, if any.
     pub fn current_guess_hint(&self) -> Option<GuessHint<'_>> {
         self.guesses
             .last()
-            .map(|guess| GuessHint::new(guess, &self.word_to_guess))
+            .map(|guess| GuessHint::new(guess, &self.word_to_guess).unwrap())
     }
 
     /// Reference to the word to guess to win the game.
@@ -206,7 +212,7 @@ pub unsafe extern "C" fn rust_str_free(string: *mut std::os::raw::c_char) {
 #[no_mangle]
 pub unsafe extern "C" fn wc_game_new(word_to_guess: *const std::os::raw::c_char) -> *mut GameT {
     let word_to_guess = std::ffi::CStr::from_ptr(word_to_guess);
-    let new_game = Box::new(Game::new(&word_to_guess.to_string_lossy()));
+    let new_game = Box::new(Game::new(&word_to_guess.to_string_lossy()).unwrap());
     Box::into_raw(new_game) as *mut GameT
 }
 
@@ -226,7 +232,7 @@ pub unsafe extern "C" fn wc_game_new_with_attempts_count_limit(
     let new_game = Box::new(Game::new_with_attempts_count_limit(
         &word_to_guess.to_string_lossy(),
         attempts_count_limit as usize,
-    ));
+    ).unwrap());
     Box::into_raw(new_game) as *mut GameT
 }
 
@@ -398,39 +404,40 @@ pub unsafe extern "C" fn wc_game_guess(
 
 #[cfg(test)]
 mod tests {
-    use super::{Game, GameGuessError, GameState, GuessHint};
+    use super::{Game, GameNewError, GameGuessError, GameState, GuessHint};
 
     #[test]
     fn game_new() {
-        let game = Game::new("test");
+        let game = Game::new("test").expect("new game");
         assert_eq!(&game.word_to_guess, "TEST");
         assert!(game.guesses.is_empty());
         assert_eq!(game.attempts_count_limit, 6);
     }
 
     #[test]
-    #[should_panic]
-    fn game_new_empty_panics() {
-        Game::new("");
+    fn game_new_empty() {
+        assert_eq!(Game::new(""), Err(GameNewError::WordToGuessEmpty));
     }
 
     #[test]
     fn game_new_with_attempts_count_limit() {
-        let game = Game::new_with_attempts_count_limit("test", 7);
+        let game = Game::new_with_attempts_count_limit("test", 7).expect("new game");
         assert_eq!(&game.word_to_guess, "TEST");
         assert!(game.guesses.is_empty());
         assert_eq!(game.attempts_count_limit, 7);
     }
 
     #[test]
-    #[should_panic]
-    fn game_new_with_attempts_count_limit_null_panics() {
-        Game::new_with_attempts_count_limit("test", 0);
+    fn game_new_with_attempts_count_limit_null() {
+        assert_eq!(
+            Game::new_with_attempts_count_limit("test", 0),
+            Err(GameNewError::AttemptsCountLimitNull)
+        );
     }
 
     #[test]
     fn game_state_pending() {
-        let game = Game::new("test");
+        let game = Game::new("test").expect("new game");
         assert_eq!(
             game.state(),
             GameState::Pending {
@@ -441,33 +448,33 @@ mod tests {
 
     #[test]
     fn game_state_won() {
-        let mut game = Game::new("temp");
+        let mut game = Game::new("temp").expect("new game");
         game.guesses.push(String::from("TEMP"));
         assert_eq!(game.state(), GameState::Won { attempts: 1 });
     }
 
     #[test]
     fn game_state_lost() {
-        let mut game = Game::new("temp");
+        let mut game = Game::new("temp").expect("new game");
         game.guesses = vec![String::from("TEST"); 6];
         assert_eq!(game.state(), GameState::Lost);
     }
 
     #[test]
     fn game_current_guess_hint() {
-        let mut game = Game::new("temp");
+        let mut game = Game::new("temp").expect("new game");
         assert!(game.current_guess_hint().is_none());
 
         game.guesses = vec![String::from("TEST"), String::from("THIS")];
         let mut guess_hints = game.guess_hints();
-        assert_eq!(guess_hints.next(), Some(GuessHint::new("TEST", "TEMP")));
-        assert_eq!(guess_hints.next(), Some(GuessHint::new("THIS", "TEMP")));
+        assert_eq!(guess_hints.next(), Some(GuessHint::new("TEST", "TEMP").expect("new guess hint")));
+        assert_eq!(guess_hints.next(), Some(GuessHint::new("THIS", "TEMP").expect("new guess hint")));
         assert_eq!(guess_hints.next(), None);
     }
 
     #[test]
     fn game_guess_invalid_length() {
-        let mut game = Game::new("temp");
+        let mut game = Game::new("temp").expect("new game");
         assert_eq!(
             game.guess("it"),
             Err(GameGuessError::LengthInvalid {
@@ -479,7 +486,7 @@ mod tests {
 
     #[test]
     fn game_guess_state() {
-        let mut game = Game::new("temp");
+        let mut game = Game::new("temp").expect("new game");
         assert_eq!(
             game.guess("this"),
             Ok(GameState::Pending {
@@ -490,7 +497,7 @@ mod tests {
 
     #[test]
     fn game_guess_already_played() {
-        let mut game = Game::new("temp");
+        let mut game = Game::new("temp").expect("new game");
         assert_eq!(
             game.guess("this"),
             Ok(GameState::Pending {
@@ -503,7 +510,7 @@ mod tests {
 
     #[test]
     fn game_get_word_to_guess() {
-        let mut game = Game::new("temp");
+        let mut game = Game::new("temp").expect("new game");
         assert_eq!(game.word_to_guess(), "TEMP");
         game.word_to_guess = String::from("HELLO");
         assert_eq!(game.word_to_guess(), "HELLO");

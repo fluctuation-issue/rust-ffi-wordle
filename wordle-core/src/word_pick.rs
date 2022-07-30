@@ -40,6 +40,7 @@ impl<T: WordPicker> std::iter::Iterator for WordPickerIter<T> {
 ///
 /// Goes from first word to last.
 /// Wrap to the first word once the end has been reached.
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct ListWordPicker {
     words: Vec<String>,
     current_word_index: usize,
@@ -47,19 +48,28 @@ pub struct ListWordPicker {
 
 impl_into_word_picker_iter!(ListWordPicker);
 
-impl<S: AsRef<str>> std::iter::FromIterator<S> for ListWordPicker {
-    /// # Panics
-    ///
-    /// Will panic if the list is empty.
+/// Could not convert an iterator over strings to a [ListWordPicker].
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
+pub enum ListWordPickerFromIteratorError {
+    /// The list constituted from the iterator did not contain any valid word.
+    NoWords
+}
+
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
+struct ListWordPickerFromIterator(Result<ListWordPicker, ListWordPickerFromIteratorError>);
+
+impl<S: AsRef<str>> std::iter::FromIterator<S> for ListWordPickerFromIterator {
     fn from_iter<I: std::iter::IntoIterator<Item=S>>(iter: I) -> Self {
         let words: Vec<String> = iter.into_iter().map(|word| word.as_ref().to_string()).collect();
-        if words.is_empty() {
-            panic!("the words list must not be empty");
-        }
-        Self {
-            words,
-            current_word_index: 0,
-        }
+        let result = if words.is_empty() {
+            Err(ListWordPickerFromIteratorError::NoWords)
+        } else {
+            Ok(ListWordPicker {
+                words,
+                current_word_index: 0,
+            })
+        };
+        Self(result)
     }
 }
 
@@ -172,7 +182,11 @@ pub unsafe extern "C" fn wc_word_picker_new_from_list(mut words: *const *const s
         words = words.add(1);
     }
 
-    let inner_picker= Box::into_raw(Box::new(ListWordPicker::from_iter(list))) as *mut std::ffi::c_void;
+    let inner_picker = match ListWordPickerFromIterator::from_iter(list).0 {
+        Err(_) => return std::ptr::null_mut(),
+        Ok(picker) => picker,
+    };
+    let inner_picker = Box::into_raw(Box::new(inner_picker)) as *mut std::ffi::c_void;
     let picker = WordPickerT {
         this: inner_picker,
         pick_word: pick_word_generic::<ListWordPicker>,
@@ -225,24 +239,26 @@ pub unsafe extern "C" fn wc_word_picker_free(picker: *mut WordPickerT) {
 
 #[cfg(test)]
 mod tests {
-    use super::{WordPicker, ListWordPicker, RandomWordPicker};
+    use super::{WordPicker, ListWordPickerFromIterator, ListWordPickerFromIteratorError, RandomWordPicker};
 
     #[test]
-    #[should_panic]
-    fn list_word_picker_from_empty_list_panics() {
-        ListWordPicker::from_iter::<[&str; 0]>([]);
+    fn list_word_picker_from_empty_list() {
+        assert_eq!(
+            ListWordPickerFromIterator::from_iter::<[&str; 0]>([]),
+            ListWordPickerFromIterator(Err(ListWordPickerFromIteratorError::NoWords))
+        );
     }
 
     #[test]
     fn list_word_picker_from_list() {
-        let list = ListWordPicker::from_iter(["this", "is", "a", "test"]);
+        let list = ListWordPickerFromIterator::from_iter(["this", "is", "a", "test"]).0.unwrap();
         assert_eq!(list.words, vec![String::from("this"), String::from("is"), String::from("a"), String::from("test")]);
         assert_eq!(list.current_word_index, 0);
     }
 
     #[test]
     fn list_word_implements_word_picker() {
-        let mut list: Box<dyn WordPicker> = Box::new(ListWordPicker::from_iter(["this", "is", "a", "test"]));
+        let mut list: Box<dyn WordPicker> = Box::new(ListWordPickerFromIterator::from_iter(["this", "is", "a", "test"]).0.unwrap());
         assert_eq!(list.pick_word(), String::from("this"));
         assert_eq!(list.pick_word(), String::from("is"));
         assert_eq!(list.pick_word(), String::from("a"));
@@ -255,7 +271,7 @@ mod tests {
 
     #[test]
     fn list_word_implements_iterator() {
-        let mut list =  ListWordPicker::from_iter("this is a test".split_whitespace()).into_iter();
+        let mut list = ListWordPickerFromIterator::from_iter("this is a test".split_whitespace()).0.unwrap().into_iter();
         assert_eq!(list.next(), Some(String::from("this")));
         assert_eq!(list.next(), Some(String::from("is")));
         assert_eq!(list.next(), Some(String::from("a")));

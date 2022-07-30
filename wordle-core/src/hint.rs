@@ -22,34 +22,32 @@ pub struct GuessHint<'a> {
     word_to_guess: &'a str,
 }
 
+/// Could not instantiate a guess hint.
+#[derive(Debug)]
+#[cfg_attr(test, derive(Eq, PartialEq))]
+pub enum GuessHintNewError {
+    /// The target word had a null length.
+    WordToGuessEmpty,
+    /// The target word and the guessed word had a different length.
+    LengthsNotMatching,
+}
+
 impl<'a> GuessHint<'a> {
     /// Initialize a new guess hint.
     ///
+    /// # Precondition
     /// The guessed word must be in uppercase.
-    ///
-    /// # Panics
-    ///
-    /// If the guessed word is not in uppercase.
-    pub(crate) fn new(guessed: &'a str, word_to_guess: &'a str) -> Self {
+    pub(crate) fn new(guessed: &'a str, word_to_guess: &'a str) -> Result<Self, GuessHintNewError> {
         assert_eq!(guessed, guessed.to_uppercase().as_str());
-        Self::assert_guess_and_target_words_are_correct(guessed, word_to_guess);
-        Self {
-            guessed,
-            word_to_guess,
-        }
-    }
-
-    /// Make sure that guessed word and word to guess are correct.
-    ///
-    /// Neither word can be empty.
-    /// They must have the same length.
-    fn assert_guess_and_target_words_are_correct(guessed: &'a str, word_to_guess: &'a str) {
         if guessed.is_empty() {
-            panic!("Guessed word must not be empty.");
-        } else if word_to_guess.is_empty() {
-            panic!("Word to guess must not be empty.");
+            Err(GuessHintNewError::WordToGuessEmpty)
         } else if guessed.len() != word_to_guess.len() {
-            panic!("Guess and target words must have the same length.");
+            Err(GuessHintNewError::LengthsNotMatching)
+        } else {
+            Ok(Self {
+                guessed,
+                word_to_guess,
+            })
         }
     }
 
@@ -254,29 +252,35 @@ pub unsafe extern "C" fn wc_guess_hint_free_guessed_letters_and_hints(
 
 #[cfg(test)]
 mod tests {
-    use super::{get_letter_occurrences, GuessHint, LetterHint};
+    use super::{get_letter_occurrences, GuessHint, GuessHintNewError, LetterHint};
 
     #[test]
-    #[should_panic]
-    fn guess_hint_new_empty_target_panics() {
-        GuessHint::new("hello", "");
+    fn guess_hint_new_empty_word_to_guess() {
+        assert_eq!(
+            GuessHint::new("", "hi"),
+            Err(GuessHintNewError::WordToGuessEmpty)
+        );
     }
 
     #[test]
-    #[should_panic]
-    fn guess_hint_new_empty_guess_panics() {
-        GuessHint::new("", "hi");
+    fn guess_hint_new_empty_guessed_word() {
+        assert_eq!(
+            GuessHint::new("HELLO", ""),
+            Err(GuessHintNewError::LengthsNotMatching)
+        );
     }
 
     #[test]
-    #[should_panic]
-    fn guess_hint_different_length_panics() {
-        GuessHint::new("hello", "hi");
+    fn guess_hint_different_lengths() {
+        assert_eq!(
+            GuessHint::new("HELLO", "hi"),
+            Err(GuessHintNewError::LengthsNotMatching)
+        );
     }
 
     #[test]
     fn guess_hint_letters_hint() {
-        let hint = GuessHint::new("AXXXX", "AAAAA");
+        let hint = GuessHint::new("AXXXX", "AAAAA").unwrap();
         let letter_hints = hint.letter_hints();
         assert_eq!(
             letter_hints,
@@ -289,7 +293,7 @@ mod tests {
             ]
         );
 
-        let hint = GuessHint::new("AXBCB", "AACBB");
+        let hint = GuessHint::new("AXBCB", "AACBB").unwrap();
         let letter_hints = hint.letter_hints();
         assert_eq!(
             letter_hints,
@@ -302,7 +306,7 @@ mod tests {
             ]
         );
 
-        let hint = GuessHint::new("AAAAB", "AACBB");
+        let hint = GuessHint::new("AAAAB", "AACBB").unwrap();
         let letter_hints = hint.letter_hints();
         assert_eq!(
             letter_hints,
@@ -315,7 +319,7 @@ mod tests {
             ]
         );
 
-        let hint = GuessHint::new("ABBBB", "AACBB");
+        let hint = GuessHint::new("ABBBB", "AACBB").unwrap();
         let letter_hints = hint.letter_hints();
         assert_eq!(
             letter_hints,
@@ -328,7 +332,7 @@ mod tests {
             ]
         );
 
-        let hint = GuessHint::new("ABBAB", "ABBBA");
+        let hint = GuessHint::new("ABBAB", "ABBBA").unwrap();
         let letter_hints = hint.letter_hints();
         assert_eq!(
             letter_hints,

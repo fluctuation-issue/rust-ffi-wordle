@@ -61,7 +61,7 @@ fn play_one_game<P: WordPicker>(picker: &mut P) {
     print_game_start_screen();
 
     let word_to_guess = picker.pick_word();
-    let mut game = Game::new(&word_to_guess);
+    let mut game = Game::new(&word_to_guess).expect("game could not be initialized");
     let mut game_ended = false;
     while !game_ended {
         print_hints(&game);
